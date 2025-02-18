@@ -39,12 +39,11 @@ jobs:
         echo "The recent commit does not follow the Conventional Commits guidelines and the PR has been closed. Please check the details." >> email.txt
 
     - name: Send failure notification with Ethereal
-      if: failure()
-      run: |
-        curl --url 'smtp://smtp.ethereal.email:587' \
-        --ssl-reqd \
-        --mail-from "${{ secrets.ETHEREAL_USERNAME }}" \
-        --mail-rcpt "alexzander.wilkinson@ethereal.email" \
-        --upload-file email.txt \
-        --user "${{ secrets.ETHEREAL_USERNAME }}:${{ secrets.ETHEREAL_PASSWORD }}" \
-        --starttls smtp
+        if: failure()
+        run: |
+          curl --url 'smtp://smtp.ethereal.email:587' \
+          --ssl-reqd \
+          --mail-from "${{ secrets.ETHEREAL_USERNAME }}" \
+          --mail-rcpt "alexzander.wilkinson@ethereal.email" \
+          --upload-file email.txt \
+          --user "${{ secrets.ETHEREAL_USERNAME }}:${{ secrets.ETHEREAL_PASSWORD }}"
