@@ -1,0 +1,38 @@
+name: Conventional Commit Check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  commit-lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Commitlint
+      run: npm install --save-dev @commitlint/cli @commitlint/config-conventional
+
+    - name: Check commits
+      uses: wagoid/commitlint-github-action@v4
+      with:
+        configFile: '.commitlintrc.json'
+        token: ${{ secrets.GITHUB_TOKEN }}
+        failOnWarnings: true
+
+    - name: Close PR
+      if: failure()
+      uses: peter-evans/close-pull@v1
+      with:
+        comment: "PR closed because commits do not follow Conventional Commits."
+        issue-number: ${{ github.event.pull_request.number }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Notify Failure
+      if: failure()
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ github.repository }}
+        event-type: commit-check-failed
