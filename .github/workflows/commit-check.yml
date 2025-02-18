@@ -1,4 +1,43 @@
-name: Conventional Commit Check
+# name: Conventional Commit Check
+
+# on:
+#   pull_request:
+#     branches: [main]
+
+# jobs:
+#   commit-lint:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: Checkout code
+#       uses: actions/checkout@v2
+
+#     - name: Install Commitlint
+#       run: npm install --save-dev @commitlint/cli @commitlint/config-conventional
+
+#     - name: Check commits
+#       uses: wagoid/commitlint-github-action@v4
+#       with:
+#         configFile: '.commitlintrc.json'
+#         token: ${{ secrets.GITHUB_TOKEN }}
+#         failOnWarnings: true
+
+#     - name: Close PR
+#       if: failure()
+#       uses: peter-evans/close-pull@v1
+#       with:
+#         comment: "PR closed because commits do not follow Conventional Commits."
+#         pull-request-number: ${{ github.event.pull_request.number }}
+#         token: ${{ secrets.GITHUB_TOKEN }}
+
+#     - name: Notify Failure
+#       if: failure()
+#       uses: peter-evans/repository-dispatch@v1
+#       with:
+#         token: ${{ secrets.GITHUB_TOKEN }}
+#         repository: ${{ github.repository }}
+#         event-type: commit-check-failed
+
+name: Conventional Commit Check and Notify
 
 on:
   pull_request:
@@ -7,6 +46,7 @@ on:
 jobs:
   commit-lint:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -21,18 +61,21 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         failOnWarnings: true
 
-    - name: Close PR
+    - name: Close PR if commit check fails
       if: failure()
       uses: peter-evans/close-pull@v1
       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        pull-request-number: ${{ github.event.pull_request.number }}
         comment: "PR closed because commits do not follow Conventional Commits."
-        issue-number: ${{ github.event.pull_request.number }}
-        token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Notify Failure
+    - name: Send failure notification with Ethereal
       if: failure()
-      uses: peter-evans/repository-dispatch@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        repository: ${{ github.repository }}
-        event-type: commit-check-failed
+      run: |
+        curl --ssl-reqd \
+        --url 'smtps://smtp.ethereal.email:465' \
+        --user '${{ secrets.ETHEREAL_USERNAME }}:${{ secrets.ETHEREAL_PASSWORD }}' \
+        --mail-from '${{ secrets.ETHEREAL_USERNAME }}@ethereal.email' \
+        --mail-rcpt 'alexzander.wilkinson@ethereal.email' \
+        --upload-file email.txt
+        echo "The recent commit does not follow the Conventional Commits guidelines and the PR has been closed. Please check the details." > email.txt
