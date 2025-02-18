@@ -1,42 +1,3 @@
-# name: Conventional Commit Check
-
-# on:
-#   pull_request:
-#     branches: [main]
-
-# jobs:
-#   commit-lint:
-#     runs-on: ubuntu-latest
-#     steps:
-#     - name: Checkout code
-#       uses: actions/checkout@v2
-
-#     - name: Install Commitlint
-#       run: npm install --save-dev @commitlint/cli @commitlint/config-conventional
-
-#     - name: Check commits
-#       uses: wagoid/commitlint-github-action@v4
-#       with:
-#         configFile: '.commitlintrc.json'
-#         token: ${{ secrets.GITHUB_TOKEN }}
-#         failOnWarnings: true
-
-#     - name: Close PR
-#       if: failure()
-#       uses: peter-evans/close-pull@v1
-#       with:
-#         comment: "PR closed because commits do not follow Conventional Commits."
-#         pull-request-number: ${{ github.event.pull_request.number }}
-#         token: ${{ secrets.GITHUB_TOKEN }}
-
-#     - name: Notify Failure
-#       if: failure()
-#       uses: peter-evans/repository-dispatch@v1
-#       with:
-#         token: ${{ secrets.GITHUB_TOKEN }}
-#         repository: ${{ github.repository }}
-#         event-type: commit-check-failed
-
 name: Conventional Commit Check and Notify
 
 on:
@@ -46,7 +7,6 @@ on:
 jobs:
   commit-lint:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -69,6 +29,15 @@ jobs:
         pull-request-number: ${{ github.event.pull_request.number }}
         comment: "PR closed because commits do not follow Conventional Commits."
 
+    - name: Create email content
+      if: failure()
+      run: |
+        echo "From: '${{ secrets.ETHEREAL_USERNAME }}@ethereal.email'" > email.txt
+        echo "To: 'your-email@example.com'" >> email.txt
+        echo "Subject: Failed Commit Convention Check" >> email.txt
+        echo "" >> email.txt
+        echo "The recent commit does not follow the Conventional Commits guidelines and the PR has been closed. Please check the details." >> email.txt
+
     - name: Send failure notification with Ethereal
       if: failure()
       run: |
@@ -76,6 +45,5 @@ jobs:
         --url 'smtps://smtp.ethereal.email:465' \
         --user '${{ secrets.ETHEREAL_USERNAME }}:${{ secrets.ETHEREAL_PASSWORD }}' \
         --mail-from '${{ secrets.ETHEREAL_USERNAME }}@ethereal.email' \
-        --mail-rcpt 'alexzander.wilkinson@ethereal.email' \
+        --mail-rcpt 'your-email@example.com' \
         --upload-file email.txt
-        echo "The recent commit does not follow the Conventional Commits guidelines and the PR has been closed. Please check the details." > email.txt
