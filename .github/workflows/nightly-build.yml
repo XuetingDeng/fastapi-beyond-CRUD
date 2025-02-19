@@ -26,19 +26,24 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build Docker image
-        run: |
-          docker build -t annki/fastapi-beyond-crud:nightly .
+        run: docker build -t annki/fastapi-beyond-crud:nightly .
+      
+      - name: Build and start Docker containers
+        run: docker-compose up -d
 
       - name: Run tests
         run: |
-          docker compose up -d
-          docker exec -it fastapi-beyond-crud-web pytest
-          docker compose down -v
+          while ! docker exec fastapi-beyond-crud-db-1 pg_isready -q; do
+            echo "Waiting for database to be ready..."
+            sleep 1
+          done
+          echo "Database is ready."
+          docker exec fastapi-beyond-crud-web-1 pytest
+          docker-compose down -v
 
       - name: Push Docker image
         if: success()
-        run: |
-          docker push annki/fastapi-beyond-crud:nightly
+        run: docker push annki/fastapi-beyond-crud:nightly
 
       - name: Create email content
         if: failure()
