@@ -41,6 +41,11 @@
    ```bash
    exit
    ```
+   
+8. Delete container and cache:
+   ```bash
+   docker-compose down -v
+   ```
 
 ### Testing the Nightly Build Action
 To test the nightly build action:
