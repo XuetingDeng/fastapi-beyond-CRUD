@@ -1,78 +1,9 @@
-# name: Nightly Build
-
-# on:
-#   schedule:
-#     - cron: '0 8 * * *'  # CA 12am everynight
-#   workflow_dispatch:  # matually trigger it
-
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v3
-
-#       - name: Set up Docker Buildx
-#         uses: docker/setup-buildx-action@v2
-
-#       - name: Set up Docker Compose
-#         uses: docker/setup-compose-action@v2
-
-#       - name: Create .env from .env.example
-#         run: cp .env.example .env
-
-#       - name: Log in to Docker Hub
-#         uses: docker/login-action@v2
-#         with:
-#           username: ${{ secrets.DOCKER_HUB_USERNAME }}
-#           password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-#       - name: Build Docker image
-#         run: docker build -t annki/fastapi-beyond-crud:nightly .
-      
-#       - name: Build and start Docker containers
-#         run: docker-compose up -d
-
-#       - name: Run tests
-#         run: |
-#           while ! docker exec fastapi-beyond-crud-db-1 pg_isready -q; do
-#             echo "Waiting for database to be ready..."
-#             sleep 1
-#           done
-#           echo "Database is ready."
-#           docker exec fastapi-beyond-crud-web-1 pytest
-#           docker-compose down -v
-
-#       - name: Push Docker image
-#         if: success()
-#         run: docker push annki/fastapi-beyond-crud:nightly
-
-#       - name: Create email content
-#         if: failure()
-#         run: |
-#           echo "From: ${{ secrets.ETHEREAL_USERNAME }}@ethereal.email" > email.txt
-#           echo "To: alexzander.wilkinson@ethereal.email" >> email.txt
-#           echo "Subject: Nightly Build Failed" >> email.txt
-#           echo "" >> email.txt
-#           echo "The nightly build failed because some test cases did not pass. Please check the logs for more details." >> email.txt
-
-#       - name: Send failure notification with Ethereal
-#         if: failure()
-#         run: |
-#           curl --url 'smtp://smtp.ethereal.email:587' \
-#           --ssl-reqd \
-#           --mail-from "${{ secrets.ETHEREAL_USERNAME }}" \
-#           --mail-rcpt "alexzander.wilkinson@ethereal.email" \
-#           --upload-file email.txt \
-#           --user "${{ secrets.ETHEREAL_USERNAME }}:${{ secrets.ETHEREAL_PASSWORD }}"
-
 name: Nightly Build
 
 on:
   schedule:
     - cron: '0 8 * * *'  # CA 12am everynight
-  workflow_dispatch:  # manually trigger it
+  workflow_dispatch:  # matually trigger it
 
 jobs:
   build:
@@ -80,10 +11,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Set up Docker
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v2
+
+      - name: Create .env from .env.example
+        run: cp .env.example .env
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -92,26 +29,24 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build Docker image
-        run: |
-          docker build -t annki/fastapi-beyond-crud:nightly .
+        run: docker build -t annki/fastapi-beyond-crud:nightly .
+      
+      - name: Build and start Docker containers
+        run: docker compose up -d
 
-      - name: Create .env from .env.example
+      - name: Run tests
         run: |
-          cp .env.example .env
-          export $(grep -v '^#' .env | xargs) 
-          cat .env | sed 's/^/echo "/; s/$/" >> $GITHUB_ENV/' | bash
-
-      - name: Run tests in Docker
-        run: |
-          docker run --name test-container -d annki/fastapi-beyond-crud:nightly
-          docker exec test-container pytest
-          docker stop test-container
-          docker rm test-container
+          while ! docker exec fastapi-beyond-crud-db-1 pg_isready -q; do
+            echo "Waiting for database to be ready..."
+            sleep 1
+          done
+          echo "Database is ready."
+          docker exec fastapi-beyond-crud-web-1 pytest
+          docker-compose down -v
 
       - name: Push Docker image
         if: success()
-        run: |
-          docker push annki/fastapi-beyond-crud:nightly
+        run: docker push annki/fastapi-beyond-crud:nightly
 
       - name: Create email content
         if: failure()
