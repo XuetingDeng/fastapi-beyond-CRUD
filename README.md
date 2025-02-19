@@ -1,80 +1,43 @@
-# FastAPI Beyond CRUD 
+## How to Run the Project
 
-This is the source code for the [FastAPI Beyond CRUD](https://youtube.com/playlist?list=PLEt8Tae2spYnHy378vMlPH--87cfeh33P&si=rl-08ktaRjcm2aIQ) course. The course focuses on FastAPI development concepts that go beyond the basic CRUD operations.
+### Instructions for Testing on Docker
 
-For more details, visit the project's [website](https://jod35.github.io/fastapi-beyond-crud-docs/site/).
+1. Pull the main branch of the GitHub repository:
+   ```bash
+   git clone https://github.com/XuetingDeng/fastapi-beyond-CRUD.git
+   cd fastapi-beyond-CRUD
+   ```
 
-## Table of Contents
+2. Copy the .env.example file to .env:
+   ```bash
+   cp .env.example .env
+   ```
 
-1. [Getting Started](#getting-started)
-2. [Prerequisites](#prerequisites)
-3. [Project Setup](#project-setup)
-4. [Running the Application](#running-the-application)
-5. [Running Tests](#running-tests)
-6. [Contributing](#contributing)
+3. Start the Docker containers:
+   ```bash
+   docker-compose up
+   ```
 
-## Getting Started
-Follow the instructions below to set up and run your FastAPI project.
+4. Once the services are running, open your browser and navigate to:
+   ```bash
+   http://localhost:8000/api/v1/docs
+   ```
 
-### Prerequisites
-Ensure you have the following installed:
+5. To run the tests, open another terminal and enter the Docker container:
+   ```bash
+   docker exec -it fastapi-beyond-crud-web-1 /bin/bash
+   ```
 
-- Python >= 3.10
-- PostgreSQL
-- Redis
+6. Inside the container, run the tests using:
+   ```bash
+   pytest
+   ```
+   or
+   ```bash
+   pytest src/tests/
+   ```
 
-### Project Setup
-1. Clone the project repository:
-    ```bash
-    git clone https://github.com/jod35/fastapi-beyond-CRUD.git
-    ```
-   
-2. Navigate to the project directory:
-    ```bash
-    cd fastapi-beyond-CRUD/
-    ```
-
-3. Create and activate a virtual environment:
-    ```bash
-    python3 -m venv env
-    source env/bin/activate
-    ```
-
-4. Install the required dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-5. Set up environment variables by copying the example configuration:
-    ```bash
-    cp .env.example .env
-    ```
-
-6. Run database migrations to initialize the database schema:
-    ```bash
-    alembic upgrade head
-    ```
-
-7. Open a new terminal and ensure your virtual environment is active. Start the Celery worker (Linux/Unix shell):
-    ```bash
-    sh runworker.sh
-    ```
-
-## Running the Application
-Start the application:
-
-```bash
-fastapi dev src/
-```
-Alternatively, you can run the application using Docker:
-```bash
-docker compose up -d
-```
-## Running Tests
-Run the tests using this command
-```bash
-pytest
-```
-
-## Contributing
-I welcome contributions to improve the documentation! You can contribute [here](https://github.com/jod35/fastapi-beyond-crud-docs).
+7. After running the tests, exit the container:
+   ```bash
+   exit
+   ```
