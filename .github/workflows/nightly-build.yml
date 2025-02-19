@@ -1,0 +1,56 @@
+name: Nightly Build
+
+on:
+  schedule:
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: yourusername/yourimage:nightly
+
+      - name: Run Tests
+        run: docker-compose -f docker-compose.yml up --abort-on-container-exit
+
+      - name: Clean up Docker Compose
+        if: always()
+        run: docker-compose -f docker-compose.yml down
+
+      - name: Create email content
+        if: failure()
+        run: |
+          echo "From: ${{ secrets.ETHEREAL_USERNAME }}@ethereal.email" > email.txt
+          echo "To: alexzander.wilkinson@ethereal.email" >> email.txt
+          echo "Subject: Nightly Build Failure Notification" >> email.txt
+          echo "" >> email.txt
+          echo "The nightly build on the main branch has failed. Please review the build logs and test results to determine the cause of the failure." >> email.txt
+
+      - name: Send failure notification with Ethereal
+        if: failure()
+        run: |
+          curl --url 'smtp://smtp.ethereal.email:587' \
+          --ssl-reqd \
+          --mail-from "${{ secrets.ETHEREAL_USERNAME }}@ethereal.email" \
+          --mail-rcpt "alexzander.wilkinson@ethereal.email" \
+          --upload-file email.txt \
+          --user "${{ secrets.ETHEREAL_USERNAME }}:${{ secrets.ETHEREAL_PASSWORD }}"
