@@ -39,7 +39,7 @@ jobs:
           done
           echo "Database is ready."
           docker exec fastapi-beyond-crud-web-1 pytest
-          docker-compose down -v
+          docker compose down -v
 
       - name: Push Docker image
         if: success()
