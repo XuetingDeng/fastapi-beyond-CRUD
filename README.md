@@ -1,4 +1,4 @@
-## How to Run the Project
+## How to Run the Project on Docker
 
 ### Instructions for Testing on Docker
 
@@ -41,3 +41,40 @@
    ```bash
    exit
    ```
+
+### Testing the Nightly Build Action
+To test the nightly build action:
+1. Go to the GitHub Actions tab in your repository.
+2. Find the Nightly Build workflow.
+3. Click Run workflow and ensure the base source is the main branch.
+
+### Docker Hub Information
+* My Docker Hub Link: https://hub.docker.com/repositories/annki
+* Repository Link: https://hub.docker.com/repository/docker/annki/fastapi-beyond-crud/general
+* My Docker Hub Username: annki
+
+### Email Configuration (Ethereal)
+* Host: smtp.ethereal.email
+* Port: 587
+* Username: alexzander.wilkinson@ethereal.email
+* Password: 9K1T26U8jJV41cVEDH
+
+### Project Requirements
+#### Part 1: Conventional Commits
+1. All Pull Requests (PRs) must follow the **Conventional Commits** format.
+2. If a PR does not follow the Conventional Commits format (invalid), it will be **automatically closed**.
+3. Failure notifications are sent via **Ethereal Email**.
+
+#### Part 2: Nightly Build
+1. The workflow runs, builds, and tests the application every night at around **12 AM PTD** (Pacific Daylight Time). It can also be **manually** triggered.
+2. If all tests pass, the Docker image will be pushed to **Docker Hub**.
+3. If any test fails, a failure notification is sent via **Ethereal** Email.
+
+### List of Changes
+* .github/workflows/commit-check.yml: Added GitHub Actions workflow for Conventional Commits validation.
+* .github/workflows/nightly-build.yml: Implemented nightly builds with Docker image push to Docker Hub.
+* .commitlintrc.json:
+* .env.example: edit with my config
+* Dockerfile: change src/main to src __init__.py
+* compose.yml: env file, ports, commands
+* requirements.txt: add pytest
