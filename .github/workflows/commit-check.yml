@@ -8,37 +8,37 @@ jobs:
   commit-lint:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Install Commitlint
-      run: npm install --save-dev @commitlint/cli @commitlint/config-conventional
+      - name: Install Commitlint
+        run: npm install --save-dev @commitlint/cli @commitlint/config-conventional
 
-    - name: Check commits
-      uses: wagoid/commitlint-github-action@v4
-      with:
-        configFile: '.commitlintrc.json'
-        token: ${{ secrets.GITHUB_TOKEN }}
-        failOnWarnings: true
+      - name: Check commits
+        uses: wagoid/commitlint-github-action@v4
+        with:
+          configFile: '.commitlintrc.json'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          failOnWarnings: true
 
-    - name: Close PR if commit check fails
-      if: failure()
-      uses: peter-evans/close-pull@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        pull-request-number: ${{ github.event.pull_request.number }}
-        comment: "PR closed because commits do not follow Conventional Commits."
+      - name: Close PR if commit check fails
+        if: failure()
+        uses: peter-evans/close-pull@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ github.event.pull_request.number }}
+          comment: "PR closed because commits do not follow Conventional Commits."
 
-    - name: Create email content
-      if: failure()
-      run: |
-        echo "From: ${ETHEREAL_USERNAME}@ethereal.email" > email.txt
-        echo "To: alexzander.wilkinson@ethereal.email" >> email.txt
-        echo "Subject: Failed Commit Convention Check" >> email.txt
-        echo "" >> email.txt
-        echo "The recent commit does not follow the Conventional Commits guidelines and the PR has been closed. Please check the details." >> email.txt
+      - name: Create email content
+        if: failure()
+        run: |
+          echo "From: ${ETHEREAL_USERNAME}@ethereal.email" > email.txt
+          echo "To: alexzander.wilkinson@ethereal.email" >> email.txt
+          echo "Subject: Failed Commit Convention Check" >> email.txt
+          echo "" >> email.txt
+          echo "The recent commit does not follow the Conventional Commits guidelines and the PR has been closed. Please check the details." >> email.txt
 
-    - name: Send failure notification with Ethereal
+      - name: Send failure notification with Ethereal
         if: failure()
         run: |
           curl --url 'smtp://smtp.ethereal.email:587' \
