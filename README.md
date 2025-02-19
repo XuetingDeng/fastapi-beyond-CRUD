@@ -1,6 +1,6 @@
-## How to Run the Project on Docker
+## 🐳 How to Run the Project on Docker
 
-### Instructions for Testing on Docker
+### 👾 Instructions for Testing on Docker
 
 1. Pull the main branch of the GitHub repository:
    ```bash
@@ -47,18 +47,45 @@
    docker-compose down -v
    ```
 
-### Testing the Nightly Build Action
+### ☀️ Testing the Conventional Commits Action
+To test the conventional commits action:
+1. Create a new test branch
+   ```bash
+   git checkout -b test-bad-commit
+   ```
+2. Create a non-compliant commit
+   ```bash
+   echo "This is a test." > test.txt
+   git add test.txt
+   git commit -m "updated test file"
+   ```
+3. Push to GitHub and create a PR
+   ```bash
+   git push origin test-bad-commit
+   ```
+5. Go to project homepage, click "Pull requests", then click "New pull request". Select your test-bad-commit branch as the "compare" branch, and the "base" branch as main. Submit the PR.
+6. GitHub Actions Will be Triggered
+7. Log in to Ethereal
+
+   https://ethereal.email/
+9. Username and Password
+    
+   alexzander.wilkinson@ethereal.email
+   
+   9K1T26U8jJV41cVEDH
+
+### 🌛 Testing the Nightly Build Action
 To test the nightly build action:
 1. Go to the GitHub Actions tab in your repository.
 2. Find the Nightly Build workflow.
 3. Click Run workflow and ensure the base source is the main branch.
 
-### Docker Hub Information
+### 🟢 Docker Hub Information
 * My Docker Hub Link: https://hub.docker.com/repositories/annki
 * Repository Link: https://hub.docker.com/repository/docker/annki/fastapi-beyond-crud/general
 * My Docker Hub Username: annki
 
-### Email Configuration (Ethereal)
+### 🟢 Email Configuration (Ethereal)
 * Host: smtp.ethereal.email
 * Port: 587
 * Username: alexzander.wilkinson@ethereal.email
